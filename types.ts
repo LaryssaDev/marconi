@@ -23,7 +23,7 @@ export interface Booking {
   customerPhone: string;
   customerEmail: string;
   professionalId: string;
-  serviceId: string;
+  serviceIds: string[]; // Changed from single serviceId to array
   date: string; // ISO format
   time: string; // "HH:00"
   status: BookingStatus;

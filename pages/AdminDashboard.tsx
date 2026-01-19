@@ -71,11 +71,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }) => {
       return { name: p.name, value: barberRev };
     });
 
-    // Most used service
+    // Most used service (counting all services in serviceIds)
     const serviceCounts: Record<string, number> = {};
     approvedBookings.forEach(b => {
-      const s = SERVICES.find(svc => svc.id === b.serviceId)?.name || 'Outro';
-      serviceCounts[s] = (serviceCounts[s] || 0) + 1;
+      b.serviceIds.forEach(id => {
+        const s = SERVICES.find(svc => svc.id === id)?.name || 'Outro';
+        serviceCounts[s] = (serviceCounts[s] || 0) + 1;
+      });
     });
     const topService = Object.entries(serviceCounts).sort((a,b) => b[1] - a[1])[0] || ['Nenhum', 0];
 
@@ -277,7 +279,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }) => {
                   <thead className="bg-slate-800/50 text-slate-400 text-xs uppercase tracking-widest font-bold">
                     <tr>
                       <th className="px-6 py-4">Cliente</th>
-                      <th className="px-6 py-4">Serviço</th>
+                      <th className="px-6 py-4">Procedimentos</th>
                       {user.role === 'manager' && <th className="px-6 py-4">Barbeiro</th>}
                       <th className="px-6 py-4">Data/Hora</th>
                       <th className="px-6 py-4">Status</th>
@@ -296,8 +298,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }) => {
                           <p className="text-xs text-slate-500">{b.customerPhone}</p>
                         </td>
                         <td className="px-6 py-4">
-                          <p className="text-sm font-medium">{SERVICES.find(s => s.id === b.serviceId)?.name}</p>
-                          <p className="text-xs text-amber-500 font-bold">R$ {b.totalValue.toFixed(2)}</p>
+                          <div className="space-y-0.5">
+                            {b.serviceIds.map(id => (
+                              <p key={id} className="text-sm font-medium">• {SERVICES.find(s => s.id === id)?.name}</p>
+                            ))}
+                          </div>
+                          <p className="text-xs text-amber-500 font-bold mt-1">Total: R$ {b.totalValue.toFixed(2)}</p>
                         </td>
                         {user.role === 'manager' && (
                           <td className="px-6 py-4">

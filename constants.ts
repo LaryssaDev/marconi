@@ -1,7 +1,7 @@
 
 import { Service, Professional } from './types';
 
-export const LOGO_URL = "https://i.imgur.com/GldpJBI.png"; // Placeholder since imgur album is tricky, using a barber icon from user list
+export const LOGO_URL = "https://i.imgur.com/4CrnULK.jpeg";
 
 export const SPACE_GALLERY = [
   "https://i.imgur.com/r9Xwuow.png",
@@ -53,7 +53,7 @@ export const PROFESSIONALS: Professional[] = [
   {
     id: "wallison",
     name: "Wallison",
-    photo: "https://i.imgur.com/W0ofwc9.png",
+    photo: "https://i.imgur.com/2vDSJIE.png",
     specialty: "Especialista em crespos / cacheados / ondulados",
     role: "barber",
     login: "Wallison226",
@@ -100,6 +100,6 @@ export const SERVICES: Service[] = [
   { id: "18", name: "Depilação Higiênica", price: 50 },
 ];
 
-export const WHATSAPP_CONTACT = "5511976612575";
+export const WHATSAPP_CONTACT = "11977809124";
 export const INSTAGRAM_LINK = "https://www.instagram.com/barbeariamarconi/";
 export const MAPS_LINK = "https://maps.app.goo.gl/CmZ5KxNyijGfXrC86";

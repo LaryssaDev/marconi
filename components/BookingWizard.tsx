@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, Clock, User as UserIcon, Scissors, Check, Send } from 'lucide-react';
+import { X, Calendar, Clock, User as UserIcon, Scissors, Check, Send, Plus, Trash2 } from 'lucide-react';
 import { PROFESSIONALS, SERVICES, WHATSAPP_CONTACT } from '../constants';
 import { Professional, Service, Booking } from '../types';
 
@@ -11,7 +11,7 @@ interface BookingWizardProps {
 const BookingWizard: React.FC<BookingWizardProps> = ({ onClose }) => {
   const [step, setStep] = useState(1);
   const [selectedProfessional, setSelectedProfessional] = useState<Professional | null>(null);
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedServices, setSelectedServices] = useState<Service[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [customerData, setCustomerData] = useState({
@@ -33,8 +33,18 @@ const BookingWizard: React.FC<BookingWizardProps> = ({ onClose }) => {
     }
   }, [selectedProfessional, selectedDate]);
 
+  const toggleService = (service: Service) => {
+    if (selectedServices.find(s => s.id === service.id)) {
+      setSelectedServices(selectedServices.filter(s => s.id !== service.id));
+    } else {
+      setSelectedServices([...selectedServices, service]);
+    }
+  };
+
+  const totalPrice = selectedServices.reduce((acc, s) => acc + s.price, 0);
+
   const handleFinalize = () => {
-    if (!selectedProfessional || !selectedService || !selectedDate || !selectedTime) return;
+    if (!selectedProfessional || selectedServices.length === 0 || !selectedDate || !selectedTime) return;
 
     const newBooking: Booking = {
       id: Math.random().toString(36).substr(2, 9),
@@ -42,16 +52,18 @@ const BookingWizard: React.FC<BookingWizardProps> = ({ onClose }) => {
       customerPhone: customerData.phone,
       customerEmail: customerData.email,
       professionalId: selectedProfessional.id,
-      serviceId: selectedService.id,
+      serviceIds: selectedServices.map(s => s.id),
       date: selectedDate,
       time: selectedTime,
       status: 'pending',
-      totalValue: selectedService.price,
+      totalValue: totalPrice,
       createdAt: new Date().toISOString()
     };
 
     const allBookings = JSON.parse(localStorage.getItem('barbearia_bookings') || '[]');
     localStorage.setItem('barbearia_bookings', JSON.stringify([...allBookings, newBooking]));
+
+    const servicesList = selectedServices.map(s => `• ${s.name} (R$${s.price.toFixed(2)})`).join('\n');
 
     // Prepare WhatsApp message
     const message = encodeURIComponent(
@@ -60,9 +72,9 @@ const BookingWizard: React.FC<BookingWizardProps> = ({ onClose }) => {
       `📞 *Telefone:* ${customerData.phone}\n` +
       `✂️ *Profissional:* ${selectedProfessional.name}\n` +
       `📅 *Data:* ${new Date(selectedDate).toLocaleDateString('pt-BR')}\n` +
-      `⏰ *Hora:* ${selectedTime}\n` +
-      `🛠️ *Serviço:* ${selectedService.name}\n` +
-      `💰 *Valor Total:* R$${selectedService.price.toFixed(2)}\n\n` +
+      `⏰ *Hora:* ${selectedTime}\n\n` +
+      `🛠️ *Procedimentos:*\n${servicesList}\n\n` +
+      `💰 *Valor Total:* R$${totalPrice.toFixed(2)}\n\n` +
       `⏳ *Status:* Pendente - aguardando aprovação`
     );
 
@@ -72,7 +84,7 @@ const BookingWizard: React.FC<BookingWizardProps> = ({ onClose }) => {
 
   const steps = [
     { title: 'Profissional', icon: <UserIcon size={20} /> },
-    { title: 'Serviço', icon: <Scissors size={20} /> },
+    { title: 'Procedimentos', icon: <Scissors size={20} /> },
     { title: 'Data/Hora', icon: <Calendar size={20} /> },
     { title: 'Seus Dados', icon: <Check size={20} /> },
   ];
@@ -122,17 +134,35 @@ const BookingWizard: React.FC<BookingWizardProps> = ({ onClose }) => {
           )}
 
           {step === 2 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {SERVICES.map(s => (
-                <button
-                  key={s.id}
-                  onClick={() => { setSelectedService(s); setStep(3); }}
-                  className={`flex justify-between items-center p-4 rounded-xl border transition-all ${selectedService?.id === s.id ? 'bg-amber-500/10 border-amber-500' : 'bg-slate-800 border-slate-700 hover:border-slate-500'}`}
-                >
-                  <span className="font-medium">{s.name}</span>
-                  <span className="font-bold text-amber-500">R$ {s.price.toFixed(2)}</span>
-                </button>
-              ))}
+            <div className="space-y-4">
+              <div className="flex justify-between items-center mb-2">
+                <p className="text-sm text-slate-400">Selecione um ou mais procedimentos:</p>
+                {selectedServices.length > 0 && (
+                  <span className="text-amber-500 font-bold bg-amber-500/10 px-3 py-1 rounded-full text-xs">
+                    {selectedServices.length} selecionado(s)
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {SERVICES.map(s => {
+                  const isSelected = !!selectedServices.find(item => item.id === s.id);
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => toggleService(s)}
+                      className={`flex justify-between items-center p-4 rounded-xl border transition-all ${isSelected ? 'bg-amber-500/20 border-amber-500' : 'bg-slate-800 border-slate-700 hover:border-slate-500'}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-amber-500 border-amber-500' : 'border-slate-600'}`}>
+                          {isSelected && <Check size={14} className="text-slate-900" />}
+                        </div>
+                        <span className="font-medium text-left">{s.name}</span>
+                      </div>
+                      <span className="font-bold text-amber-500">R$ {s.price.toFixed(2)}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
 
@@ -179,13 +209,23 @@ const BookingWizard: React.FC<BookingWizardProps> = ({ onClose }) => {
             <div className="space-y-4">
               <div className="p-4 bg-slate-800 rounded-xl border border-slate-700 mb-6">
                 <p className="text-sm text-slate-400 uppercase tracking-widest font-bold mb-3">Resumo</p>
-                <div className="grid grid-cols-2 gap-y-2 text-sm">
-                  <span className="text-slate-400">Profissional:</span> <span className="text-right font-medium">{selectedProfessional?.name}</span>
-                  <span className="text-slate-400">Serviço:</span> <span className="text-right font-medium">{selectedService?.name}</span>
-                  <span className="text-slate-400">Data:</span> <span className="text-right font-medium">{selectedDate}</span>
-                  <span className="text-slate-400">Hora:</span> <span className="text-right font-medium">{selectedTime}</span>
-                  <span className="text-slate-400 font-bold border-t border-slate-700 pt-2 mt-2">Total:</span> 
-                  <span className="text-right font-bold text-amber-500 border-t border-slate-700 pt-2 mt-2 text-lg">R$ {selectedService?.price.toFixed(2)}</span>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between"><span className="text-slate-400">Profissional:</span> <span className="font-medium">{selectedProfessional?.name}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-400">Data:</span> <span className="font-medium">{selectedDate}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-400">Hora:</span> <span className="font-medium">{selectedTime}</span></div>
+                  <div className="mt-4 border-t border-slate-700 pt-3">
+                    <p className="text-xs text-slate-500 uppercase mb-2 font-bold">Procedimentos selecionados:</p>
+                    {selectedServices.map(s => (
+                      <div key={s.id} className="flex justify-between items-center py-1">
+                        <span className="text-slate-300">• {s.name}</span>
+                        <span className="text-slate-400">R$ {s.price.toFixed(2)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex justify-between border-t border-slate-700 pt-2 mt-2">
+                    <span className="font-bold text-lg">Total:</span> 
+                    <span className="font-bold text-amber-500 text-lg">R$ {totalPrice.toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
               <div>
@@ -235,7 +275,7 @@ const BookingWizard: React.FC<BookingWizardProps> = ({ onClose }) => {
           
           {step < 4 ? (
             <button 
-              disabled={ (step === 1 && !selectedProfessional) || (step === 2 && !selectedService) || (step === 3 && (!selectedDate || !selectedTime)) }
+              disabled={ (step === 1 && !selectedProfessional) || (step === 2 && selectedServices.length === 0) || (step === 3 && (!selectedDate || !selectedTime)) }
               onClick={() => setStep(step + 1)}
               className="px-6 py-2 rounded-lg font-bold bg-amber-500 text-slate-900 hover:bg-amber-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
