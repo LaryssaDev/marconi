@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Instagram, Phone, MapPin, ChevronRight, Menu, X, Calendar } from 'lucide-react';
+import { Instagram, Phone, MapPin, ChevronRight, Menu, X, Calendar, Scissors } from 'lucide-react';
 import { PROFESSIONALS, SPACE_GALLERY, SERVICE_GALLERY, LOGO_URL, INSTAGRAM_LINK, MAPS_LINK, WHATSAPP_CONTACT } from '../constants';
 import BookingWizard from '../components/BookingWizard';
 import { Link } from 'react-router-dom';
@@ -9,21 +9,49 @@ const PublicHome: React.FC = () => {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+      setIsMobileMenuOpen(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       {/* Navbar */}
       <nav className="fixed w-full z-40 bg-slate-950/80 backdrop-blur-md border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div 
+            className="flex items-center gap-2 cursor-pointer" 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
             <img src={LOGO_URL} alt="Marconi Logo" className="w-12 h-12" />
             <span className="text-xl font-bold tracking-tighter font-display text-amber-500">BARBEARIA MARCONI</span>
           </div>
 
           <div className="hidden md:flex items-center gap-8 text-sm font-medium uppercase tracking-widest">
-            <a href="#space" className="hover:text-amber-500 transition-colors">O Espaço</a>
-            <a href="#professionals" className="hover:text-amber-500 transition-colors">Time</a>
-            <a href="#gallery" className="hover:text-amber-500 transition-colors">Trabalhos</a>
-            <Link to="/login" className="px-4 py-2 border border-slate-700 rounded hover:bg-slate-800 transition-colors text-xs">Acesso Admin</Link>
+            <button 
+              onClick={() => scrollToSection('space')} 
+              className="hover:text-amber-500 transition-colors"
+            >
+              O Espaço
+            </button>
+            <button 
+              onClick={() => scrollToSection('professionals')} 
+              className="hover:text-amber-500 transition-colors"
+            >
+              Time
+            </button>
+            <button 
+              onClick={() => scrollToSection('gallery')} 
+              className="hover:text-amber-500 transition-colors"
+            >
+              Trabalhos
+            </button>
+            <Link to="/login" className="px-4 py-2 border border-slate-700 rounded hover:bg-slate-800 transition-colors text-xs">
+              Acesso Admin
+            </Link>
             <button 
               onClick={() => setIsWizardOpen(true)}
               className="bg-amber-600 hover:bg-amber-500 px-6 py-2 rounded-full font-bold text-slate-950 transition-all"
@@ -42,9 +70,24 @@ const PublicHome: React.FC = () => {
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-30 bg-slate-950 pt-24 px-6 md:hidden">
            <div className="flex flex-col gap-6 text-xl font-display text-center">
-            <a href="#space" onClick={() => setIsMobileMenuOpen(false)}>O Espaço</a>
-            <a href="#professionals" onClick={() => setIsMobileMenuOpen(false)}>Time</a>
-            <a href="#gallery" onClick={() => setIsMobileMenuOpen(false)}>Trabalhos</a>
+            <button 
+              onClick={() => scrollToSection('space')} 
+              className="hover:text-amber-500"
+            >
+              O Espaço
+            </button>
+            <button 
+              onClick={() => scrollToSection('professionals')} 
+              className="hover:text-amber-500"
+            >
+              Time
+            </button>
+            <button 
+              onClick={() => scrollToSection('gallery')} 
+              className="hover:text-amber-500"
+            >
+              Trabalhos
+            </button>
             <button 
               onClick={() => { setIsWizardOpen(true); setIsMobileMenuOpen(false); }}
               className="bg-amber-600 py-4 rounded-xl font-bold text-slate-950"
@@ -68,7 +111,9 @@ const PublicHome: React.FC = () => {
         </div>
         
         <div className="relative z-10 text-center px-4 max-w-4xl">
-          <img src={LOGO_URL} alt="Marconi" className="w-32 h-32 mx-auto mb-8 drop-shadow-2xl animate-bounce" />
+          <div className="mb-8 inline-flex items-center justify-center w-24 h-24 rounded-full bg-amber-500/10 border-2 border-amber-500/30 text-amber-500 animate-bounce shadow-[0_0_50px_rgba(245,158,11,0.2)]">
+            <Scissors size={48} />
+          </div>
           <h1 className="text-6xl md:text-8xl font-bold mb-6 tracking-tighter leading-tight drop-shadow-lg">
             A EXPERIÊNCIA DO <br/>
             <span className="text-amber-500 italic">CORTE PERFEITO</span>
@@ -87,7 +132,7 @@ const PublicHome: React.FC = () => {
       </section>
 
       {/* Space Gallery */}
-      <section id="space" className="py-24 px-4 max-w-7xl mx-auto">
+      <section id="space" className="py-24 px-4 max-w-7xl mx-auto scroll-mt-20">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-4 uppercase font-display tracking-widest">Nosso Espaço</h2>
           <div className="w-24 h-1 bg-amber-500 mx-auto"></div>
@@ -106,7 +151,7 @@ const PublicHome: React.FC = () => {
       </section>
 
       {/* Professionals Section */}
-      <section id="professionals" className="py-24 bg-slate-900/50">
+      <section id="professionals" className="py-24 bg-slate-900/50 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 uppercase font-display tracking-widest">Profissionais</h2>
@@ -132,7 +177,7 @@ const PublicHome: React.FC = () => {
       </section>
 
       {/* Services Gallery */}
-      <section id="gallery" className="py-24 px-4">
+      <section id="gallery" className="py-24 px-4 scroll-mt-20">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 uppercase font-display tracking-widest">Galeria de Atendimentos</h2>
@@ -174,7 +219,7 @@ const PublicHome: React.FC = () => {
             </a>
             <a href={`https://api.whatsapp.com/send?phone=${WHATSAPP_CONTACT}`} target="_blank" className="flex items-center gap-3 text-slate-400 hover:text-amber-500 transition-colors justify-center md:justify-start">
               <Phone size={20} className="text-amber-500" />
-              <span>+55 11 97661-2575</span>
+              <span>+55 11 97780-9124</span>
             </a>
             <a href={INSTAGRAM_LINK} target="_blank" className="flex items-center gap-3 text-slate-400 hover:text-amber-500 transition-colors justify-center md:justify-start">
               <Instagram size={20} className="text-amber-500" />

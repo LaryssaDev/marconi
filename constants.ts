@@ -1,7 +1,7 @@
 
 import { Service, Professional } from './types';
 
-export const LOGO_URL = "https://i.imgur.com/4CrnULK.jpeg";
+export const LOGO_URL = "https://i.imgur.com/KNo7NT5.png";
 
 export const SPACE_GALLERY = [
   "https://i.imgur.com/r9Xwuow.png",
